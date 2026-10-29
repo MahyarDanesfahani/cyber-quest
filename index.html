@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <title>Cyber Quest | Mahyar</title>
+  <style>
+    :root{color-scheme:dark;--bg:#080d18;--panel:#101a2b;--line:#263750;--cyan:#55e6ff;--green:#64ffac;--muted:#9bb0c9;--red:#ff6b87}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 20% 10%,#112a45 0,transparent 35%),radial-gradient(circle at 90% 90%,#142c30 0,transparent 30%),var(--bg);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#eaf4ff}
+    .wrap{width:min(760px,100%)}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;color:var(--muted);font-size:12px;margin-bottom:12px}.dots{display:flex;gap:6px}.dots i{width:9px;height:9px;border-radius:50%;background:#ff637d}.dots i:nth-child(2){background:#ffd166}.dots i:nth-child(3){background:#64ffac}
+    .panel{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(16,26,43,.94);box-shadow:0 20px 80px #0008}.bar{padding:14px 18px;background:#0d1524;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.bar strong{letter-spacing:2px;font-size:12px;color:var(--green)}.content{padding:clamp(22px,5vw,42px)}.eyebrow{color:var(--cyan);font-size:12px;letter-spacing:3px;text-transform:uppercase}.title{font-size:clamp(30px,6vw,48px);line-height:1.08;margin:14px 0}.title span{color:var(--green)}p{color:var(--muted);line-height:1.7}.codebox{padding:18px;border:1px solid var(--line);border-radius:12px;background:#080e19;margin:24px 0}.prompt{color:var(--green)}.slots{font-size:clamp(30px,7vw,42px);letter-spacing:12px;color:var(--cyan);text-align:center;padding:12px 0}.row{display:flex;gap:10px;flex-wrap:wrap}.row input{flex:1;min-width:150px;background:#080e19;border:1px solid #35506c;border-radius:10px;padding:14px;color:#fff;font:inherit;font-size:18px;outline:none}.row input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #55e6ff20}button{border:0;border-radius:10px;padding:14px 18px;font:inherit;font-weight:800;cursor:pointer;background:var(--green);color:#06110d}button.secondary{background:#1b2b43;color:#d9e9ff;border:1px solid #35506c}.status{min-height:28px;margin:14px 0 0;color:var(--cyan)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}.stat{padding:14px;background:#0b1321;border:1px solid var(--line);border-radius:10px}.stat small{display:block;color:var(--muted);font-size:10px;letter-spacing:1px}.stat b{display:block;font-size:22px;margin-top:6px;color:var(--green)}.footer{font-size:11px;color:#6f86a3;text-align:center;margin-top:16px}.footer a{color:var(--cyan)}@media(max-width:480px){.stats{grid-template-columns:1fr}.slots{letter-spacing:7px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div class="dots"><i></i><i></i><i></i></div><span>MAHYAR // MINI GAME 001</span><span>v1.0</span></div>
+    <section class="panel">
+      <div class="bar"><strong>● CYBER QUEST</strong><span style="color:#9bb0c9;font-size:11px">SECURE TERMINAL</span></div>
+      <div class="content">
+        <div class="eyebrow">A tiny logic challenge</div>
+        <h1 class="title">Crack the <span>Code.</span></h1>
+        <p>A secret 4-digit code is locked inside the terminal. Guess it in 8 attempts. Every digit is unique. The terminal will tell you whether your guess is too high or too low.</p>
+        <div class="codebox">
+          <div><span class="prompt">guest@cyber-quest:~$</span> authenticate --mode logic</div>
+          <div class="slots" id="display">_ _ _ _</div>
+          <form class="row" id="guessForm">
+            <input id="guess" type="text" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="Enter 4 unique digits" aria-label="Your four digit guess" required>
+            <button type="submit" id="submitBtn">UNLOCK →</button>
+          </form>
+          <div class="status" id="status" aria-live="polite">SYSTEM: Awaiting your first attempt…</div>
+        </div>
+        <div class="stats">
+          <div class="stat"><small>ATTEMPTS LEFT</small><b id="attempts">8</b></div>
+          <div class="stat"><small>SCORE</small><b id="score">800</b></div>
+          <div class="stat"><small>STATUS</small><b id="state">LOCKED</b></div>
+        </div>
+        <div class="row" style="margin-top:18px"><button class="secondary" id="restart" type="button">↻ NEW CHALLENGE</button></div>
+      </div>
+    </section>
+    <div class="footer">Built with HTML · CSS · JavaScript | <a href="https://github.com/" target="_blank" rel="noreferrer">Explore GitHub</a></div>
+  </main>
+<script>
+(() => {
+  const form = document.querySelector('#guessForm');
+  const input = document.querySelector('#guess');
+  const status = document.querySelector('#status');
+  const attemptsEl = document.querySelector('#attempts');
+  const scoreEl = document.querySelector('#score');
+  const stateEl = document.querySelector('#state');
+  const display = document.querySelector('#display');
+  const submitBtn = document.querySelector('#submitBtn');
+  let secret, attempts, finished;
+
+  function newGame() {
+    secret = '';
+    while (secret.length < 4) {
+      const digit = String(Math.floor(Math.random() * 10));
+      if (!secret.includes(digit)) secret += digit;
+    }
+    attempts = 8;
+    finished = false;
+    input.disabled = false;
+    submitBtn.disabled = false;
+    input.value = '';
+    display.textContent = '_ _ _ _';
+    attemptsEl.textContent = attempts;
+    scoreEl.textContent = '800';
+    stateEl.textContent = 'LOCKED';
+    status.textContent = 'SYSTEM: Awaiting your first attempt…';
+    input.focus();
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (finished) return;
+    const guess = input.value.trim();
+    if (!/^\d{4}$/.test(guess) || new Set(guess).size !== 4) {
+      status.textContent = 'ERROR: Enter exactly 4 different digits.';
+      return;
+    }
+    attempts--;
+    attemptsEl.textContent = attempts;
+    scoreEl.textContent = String(attempts * 100);
+    if (guess === secret) {
+      display.textContent = secret.split('').join(' ');
+      status.textContent = 'ACCESS GRANTED — Excellent work, agent!';
+      stateEl.textContent = 'UNLOCKED';
+      finished = true;
+    } else if (attempts === 0) {
+      display.textContent = secret.split('').join(' ');
+      status.textContent = `ACCESS DENIED — The code was ${secret}. Start a new challenge!`;
+      stateEl.textContent = 'FAILED';
+      finished = true;
+    } else {
+      const higher = Number(guess) > Number(secret);
+      status.textContent = `ACCESS DENIED — Try a ${higher ? 'LOWER' : 'HIGHER'} number. ${attempts} attempts remain.`;
+      input.value = '';
+      input.focus();
+    }
+    if (finished) {
+      input.disabled = true;
+      submitBtn.disabled = true;
+    }
+  });
+  document.querySelector('#restart').addEventListener('click', newGame);
+  newGame();
+})();
+</script>
+</body>
+</html>
